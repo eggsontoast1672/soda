@@ -6,6 +6,8 @@ import typing
 class TokenKind(enum.Enum):
     # Single character tokens
     MINUS = enum.auto()
+    PAREN_LEFT = enum.auto()
+    PAREN_RIGHT = enum.auto()
     PLUS = enum.auto()
     SLASH = enum.auto()
     STAR = enum.auto()
@@ -49,6 +51,12 @@ class Lexer:
         if self.source[self.current] == "-":
             self.current += 1
             return self.make_token(TokenKind.MINUS)
+        elif self.source[self.current] == "(":
+            self.current += 1
+            return self.make_token(TokenKind.PAREN_LEFT)
+        elif self.source[self.current] == ")":
+            self.current += 1
+            return self.make_token(TokenKind.PAREN_RIGHT)
         elif self.source[self.current] == "+":
             self.current += 1
             return self.make_token(TokenKind.PLUS)

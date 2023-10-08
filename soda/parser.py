@@ -54,6 +54,11 @@ class Parser:
         self.tokens = tokens
         self.current = 0
 
+    def consume(self, kind: lexer.TokenKind) -> None:
+        if self.tokens[self.current].kind != kind:
+            raise ParseError(f"expected {kind} near {self.tokens[self.current].kind}")
+        self.current += 1
+
     def get_next_expr(self) -> Expr:
         try:
             return self.get_next_term()
@@ -77,11 +82,18 @@ class Parser:
         return left
 
     def get_next_atom(self) -> Expr:
-        if self.tokens[self.current].kind != lexer.TokenKind.NUMBER:
-            raise ParseError("expected number")
-        atom = LiteralExpr(int(self.tokens[self.current].lexeme))
-        self.current += 1
-        return atom
+        match self.tokens[self.current].kind:
+            case lexer.TokenKind.NUMBER:
+                expr = LiteralExpr(int(self.tokens[self.current].lexeme))
+                self.current += 1
+                return expr
+            case lexer.TokenKind.PAREN_LEFT:
+                self.current += 1
+                expr = self.get_next_expr()
+                self.consume(lexer.TokenKind.PAREN_RIGHT)
+                return expr
+            case _:
+                raise ParseError("expected number")
 
     def has_tokens(self) -> bool:
         return self.current < len(self.tokens)
