@@ -1,0 +1,4 @@
+expression := term
+term       := factor ((MINUS | PLUS) factor)*;
+factor     := atom ((SLASH | STAR) atom)*;
+atom       := NUMBER;
