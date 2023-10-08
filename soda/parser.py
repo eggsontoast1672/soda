@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import abc
 import dataclasses
+import typing
 
 import lexer
-
+from util import SodaError
 
 class Expr(abc.ABC):
     @abc.abstractmethod
-    def accept(self, visitor: ExprVisitor) -> int:
+    def accept(self, visitor: ExprVisitor) -> typing.Any:
         pass
 
 
@@ -18,35 +19,39 @@ class BinaryExpr(Expr):
     right: Expr
     operator: lexer.Token
     
-    def accept(self, visitor: ExprVisitor) -> int:
+    def accept(self, visitor: ExprVisitor) -> typing.Any:
         return visitor.visit_binary_expr(self)
 
 
 @dataclasses.dataclass
-class LiteralExpr(Expr):
-    value: int
+class UnaryExpr(Expr):
+    operand: Expr
+    operator: lexer.Token
 
-    def accept(self, visitor) -> int:
+    def accept(self, visitor: ExprVisitor) -> typing.Any:
+        return visitor.visit_unary_expr(self)
+
+
+@dataclasses.dataclass
+class LiteralExpr(Expr):
+    value: typing.Any
+
+    def accept(self, visitor) -> typing.Any:
         return visitor.visit_literal_expr(self)
 
 
 class ExprVisitor(abc.ABC):
     @abc.abstractmethod
-    def visit_binary_expr(self, expr: BinaryExpr) -> int:
+    def visit_binary_expr(self, expr: BinaryExpr) -> typing.Any:
         pass
 
     @abc.abstractmethod
-    def visit_literal_expr(self, expr: LiteralExpr) -> int:
+    def visit_unary_expr(self, expr: UnaryExpr) -> typing.Any:
         pass
 
-
-class ParseError(Exception):
-    def __init__(self, message: str) -> None:
-        super().__init__()
-        self.message = message
-
-    def __str__(self) -> str:
-        return self.message
+    @abc.abstractmethod
+    def visit_literal_expr(self, expr: LiteralExpr) -> typing.Any:
+        pass
 
 
 class Parser:
@@ -56,14 +61,22 @@ class Parser:
 
     def consume(self, kind: lexer.TokenKind) -> None:
         if self.tokens[self.current].kind != kind:
-            raise ParseError(f"expected {kind} near {self.tokens[self.current].kind}")
+            raise SodaError(f"expected {kind} near {self.tokens[self.current].kind}")
         self.current += 1
 
     def get_next_expr(self) -> Expr:
         try:
-            return self.get_next_term()
+            return self.get_next_comparison()
         except IndexError:
-            raise ParseError("reached end of expression prematurely")
+            raise SodaError("reached end of expression prematurely")
+
+    def get_next_comparison(self) -> Expr:
+        left = self.get_next_term()
+        while self.has_tokens() and self.tokens[self.current].kind in (lexer.TokenKind.BANG_EQUAL, lexer.TokenKind.EQUAL_EQUAL):
+            operator = self.tokens[self.current]
+            self.current += 1
+            left = BinaryExpr(left, self.get_next_term(), operator)
+        return left
 
     def get_next_term(self) -> Expr:
         left = self.get_next_factor()
@@ -74,15 +87,32 @@ class Parser:
         return left
 
     def get_next_factor(self) -> Expr:
-        left = self.get_next_atom()
+        left = self.get_next_unary()
         while self.has_tokens() and self.tokens[self.current].kind in (lexer.TokenKind.SLASH, lexer.TokenKind.STAR):
             operator = self.tokens[self.current]
             self.current += 1
-            left = BinaryExpr(left, self.get_next_atom(), operator)
+            left = BinaryExpr(left, self.get_next_unary(), operator)
         return left
+
+    def get_next_unary(self) -> Expr:
+        # One element tuple so it is easier to add stuff later
+        if self.tokens[self.current].kind in (lexer.TokenKind.BANG, lexer.TokenKind.MINUS):
+            operator = self.tokens[self.current]
+            self.current += 1
+            return UnaryExpr(self.get_next_unary(), operator)
+        else:
+            return self.get_next_atom()
 
     def get_next_atom(self) -> Expr:
         match self.tokens[self.current].kind:
+            case lexer.TokenKind.FALSE:
+                expr = LiteralExpr(False)
+                self.current += 1
+                return expr
+            case lexer.TokenKind.TRUE:
+                expr = LiteralExpr(True)
+                self.current += 1
+                return expr
             case lexer.TokenKind.NUMBER:
                 expr = LiteralExpr(int(self.tokens[self.current].lexeme))
                 self.current += 1
@@ -93,7 +123,7 @@ class Parser:
                 self.consume(lexer.TokenKind.PAREN_RIGHT)
                 return expr
             case _:
-                raise ParseError("expected number")
+                raise SodaError("expected number")
 
     def has_tokens(self) -> bool:
         return self.current < len(self.tokens)

@@ -1,4 +1,6 @@
-expression := term
+expression := comparison;
+comparison := term ((BANG_EQUAL | EQUAL_EQUAL) term)*;
 term       := factor ((MINUS | PLUS) factor)*;
-factor     := atom ((SLASH | STAR) atom)*;
-atom       := NUMBER | PAREN_LEFT expression PAREN_RIGHT;
+factor     := unary ((SLASH | STAR) unary)*;
+unary      := (BANG | MINUS) unary | atom;
+atom       := FALSE | TRUE | NUMBER | PAREN_LEFT expression PAREN_RIGHT;
