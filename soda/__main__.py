@@ -1,9 +1,9 @@
 import pprint
 
-import interpreter
-import lexer
-import parser
-from util import SodaError
+from . import interpreter
+from . import lexer
+from . import parser
+from .util import SodaError
 
 while True:
     try:
@@ -22,7 +22,6 @@ while True:
         print(e.message)
         continue
 
-    pprint.pprint(tokens)
-    pprint.pprint(tree)
+    # pprint.pprint(tokens)
+    # pprint.pprint(tree)
     pprint.pprint(result)
-

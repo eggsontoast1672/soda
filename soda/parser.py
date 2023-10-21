@@ -4,8 +4,9 @@ import abc
 import dataclasses
 import typing
 
-import lexer
-from util import SodaError
+from . import lexer
+from .util import SodaError
+
 
 class Expr(abc.ABC):
     @abc.abstractmethod
@@ -72,7 +73,10 @@ class Parser:
 
     def get_next_comparison(self) -> Expr:
         left = self.get_next_term()
-        while self.has_tokens() and self.tokens[self.current].kind in (lexer.TokenKind.BANG_EQUAL, lexer.TokenKind.EQUAL_EQUAL):
+        while self.has_tokens() and self.tokens[self.current].kind in (
+            lexer.TokenKind.BANG_EQUAL,
+            lexer.TokenKind.EQUAL_EQUAL
+        ):
             operator = self.tokens[self.current]
             self.current += 1
             left = BinaryExpr(left, self.get_next_term(), operator)

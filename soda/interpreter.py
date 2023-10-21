@@ -1,8 +1,9 @@
 import typing
 
-import lexer
-import parser
-from util import SodaError
+from . import lexer
+from . import parser
+from .util import SodaError
+
 
 class Interpreter(parser.ExprVisitor):
     def evaluate(self, expr: parser.Expr) -> typing.Any:

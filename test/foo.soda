@@ -1,21 +1,3 @@
-// vim: ft=javascript
-
-// We want to be able to write code like this...
-println(69);
-println(420);
-println(9000);
-
-// Or this...
-69;
-420;
-9000;
-
-// Or this!
-println;
-println();          // This should be an error, not enough args
-println(1234, 234); // For now, too many args error
-
-// What about this?
-(((69)));
-((420));
-(9000);
+fn main(args) {
+    return 69;
+}
