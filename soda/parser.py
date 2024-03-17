@@ -4,8 +4,7 @@ import abc
 import dataclasses
 import typing
 
-from . import lexer
-from .util import SodaError
+from soda import lexer
 
 
 class Expr(abc.ABC):
@@ -19,7 +18,7 @@ class BinaryExpr(Expr):
     left: Expr
     right: Expr
     operator: lexer.Token
-    
+
     def accept(self, visitor: ExprVisitor) -> typing.Any:
         return visitor.visit_binary_expr(self)
 
