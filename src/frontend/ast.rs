@@ -1,15 +1,33 @@
-pub enum BinaryOperation {
-    Plus,
-    Minus,
-    Times,
-    Divided,
-    Modulo,
+pub enum Value {
+    Number(f64),
+    Boolean(bool),
+}
+
+pub enum UnaryOp {
+    Negative,
+    Not,
+}
+
+#[rustfmt::skip]
+pub enum BinaryOp {
+    // Numeric operations
+    Plus, Minus, Times, Divided, Modulo,
+
+    // Boolean operations
+    Equal, NotEqual,
+    Less, LessEqual,
+    Greater, GreaterEqual,
+    And, Or,
 }
 
 pub enum Expr {
-    Literal(f64),
+    Literal(Value),
+    Unary {
+        operator: UnaryOp,
+        right: Box<Expr>,
+    },
     Binary {
-        operator: BinaryOperation,
+        operator: BinaryOp,
         left: Box<Expr>,
         right: Box<Expr>,
     },
