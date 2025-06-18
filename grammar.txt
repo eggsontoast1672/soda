@@ -1,15 +1,3 @@
-program     := declaration* EOF;
-declaration := func_decl;
-func_decl   := FN IDENTIFIER PAREN_LEFT parameters? PAREN_RIGHT block;
-parameters  := IDENTIFIER (COMMA IDENTIFIER)*;
-
-statement   := return_stmt | block;
-return_stmt := RETURN expression? SEMICOLON;
-block       := BRACE_LEFT statement* BRACE_RIGHT;
-
-expression := comparison;
-comparison := term ((BANG_EQUAL | EQUAL_EQUAL) term)*;
-term       := factor ((MINUS | PLUS) factor)*;
-factor     := unary ((SLASH | STAR) unary)*;
-unary      := (BANG | MINUS) unary | atom;
-atom       := FALSE | TRUE | NUMBER | PAREN_LEFT expression PAREN_RIGHT;
+fn main() -> i32 {
+  return 0;
+}

@@ -24,6 +24,7 @@ fn eval_binary(operator: BinaryOp, left: Value, right: Value) -> Value {
         (BinaryOp::Divided, Value::Number(x), Value::Number(y)) => Value::Number(x / y),
         (BinaryOp::Modulo, Value::Number(x), Value::Number(y)) => Value::Number(x % y),
         (BinaryOp::Equal, Value::Boolean(x), Value::Boolean(y)) => Value::Boolean(x == y),
+        _ => todo!(),
     }
 }
 
