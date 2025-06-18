@@ -25,6 +25,7 @@ private:
   std::size_t m_pos = 0;
 };
 
+Program parse_source(std::string_view source);
 Program parse_tokens(const std::vector<Token> &tokens);
 
 } // namespace soda

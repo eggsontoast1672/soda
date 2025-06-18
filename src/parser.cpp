@@ -1,5 +1,7 @@
 #include "soda/parser.hpp"
 
+#include "soda/lexer.hpp"
+
 namespace soda {
 
 ParseError::ParseError(const std::string &what_arg)
@@ -35,6 +37,11 @@ Program Parser::program() {
     throw ParseError{"expected end of file"};
   }
   return return_value;
+}
+
+Program parse_source(std::string_view source) {
+  std::vector<Token> tokens = tokenize_source(source);
+  return parse_tokens(tokens);
 }
 
 Program parse_tokens(const std::vector<Token> &tokens) {

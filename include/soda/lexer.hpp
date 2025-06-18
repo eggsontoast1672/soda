@@ -20,6 +20,6 @@ private:
   std::string::const_iterator m_end;
 };
 
-std::vector<Token> tokenize(std::string_view source);
+std::vector<Token> tokenize_source(std::string_view source);
 
 } // namespace soda

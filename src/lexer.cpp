@@ -60,7 +60,7 @@ Token Lexer::next_token() {
   }
 }
 
-std::vector<Token> tokenize(std::string_view source) {
+std::vector<Token> tokenize_source(std::string_view source) {
   Lexer lexer{source};
   std::vector<Token> tokens;
   while (true) {
