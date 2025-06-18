@@ -1,5 +1,8 @@
 #include "soda/lexer.hpp"
 
+#include <sstream>
+#include <stdexcept>
+
 namespace soda {
 
 Lexer::Lexer(std::string_view source)
@@ -55,7 +58,9 @@ Token Lexer::next_token() {
       TokenKind kind = identifier_kind(lexeme);
       return {kind, lexeme};
     } else {
-      throw std::runtime_error{"unknown token"};
+      std::ostringstream s;
+      s << "unknown token: '" << *m_it << "'";
+      throw std::runtime_error{s.str()};
     }
   }
 }
