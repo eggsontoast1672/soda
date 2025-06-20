@@ -15,7 +15,6 @@ void compile_file(std::filesystem::path input, std::filesystem::path output) {
   std::ostringstream contents;
   contents << file.rdbuf();
   std::string source = contents.str();
-  std::cerr << "[DEBUG] \"" << source << "\"\n";
   compile_source(source, output);
 }
 

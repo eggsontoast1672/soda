@@ -22,6 +22,8 @@ TokenKind identifier_kind(std::string_view lexeme);
 struct Token {
   TokenKind kind;
   std::string lexeme;
+  std::size_t line;
+  std::size_t column;
 };
 
 } // namespace soda
