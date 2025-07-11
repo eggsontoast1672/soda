@@ -3,27 +3,25 @@
 #include <string>
 
 namespace soda {
+  enum class TokenKind {
+    BraceLeft,
+    BraceRight,
+    ParenLeft,
+    ParenRight,
+    Semicolon,
+    Identifier,
+    Number,
+    Fn,
+    Return,
+    EndOfFile,
+  };
 
-enum class TokenKind {
-  BraceLeft,
-  BraceRight,
-  ParenLeft,
-  ParenRight,
-  Semicolon,
-  Identifier,
-  Number,
-  Fn,
-  Return,
-  EndOfFile,
-};
+  TokenKind identifier_kind(std::string_view lexeme);
 
-TokenKind identifier_kind(std::string_view lexeme);
-
-struct Token {
-  TokenKind kind;
-  std::string lexeme;
-  std::size_t line;
-  std::size_t column;
-};
-
-} // namespace soda
+  struct Token {
+    TokenKind kind;
+    std::string lexeme;
+    std::size_t line;
+    std::size_t column;
+  };
+}

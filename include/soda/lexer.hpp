@@ -1,49 +1,70 @@
 #pragma once
 
 #include <exception>
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "soda/token.hpp"
 
 namespace soda {
-
-/**
- * An error which occurs during lexing, representing the presence of an
- * unrecognized character.
- */
-class LexError : public std::exception {
-public:
-  explicit LexError(const char *source, std::size_t line, std::size_t column);
-
   /**
-   * A formatted error message from the lexer.
+   * An error which occurs during lexing, representing the presence of an
+   * unrecognized character.
    */
-  inline const char *what() const noexcept override {
-    return m_message.c_str();
-  }
+  class LexError : public std::exception {
+  public:
+    explicit LexError(const char *source, std::size_t line, std::size_t column);
 
-private:
-  const char *m_source;
-  std::size_t m_line;
-  std::size_t m_column;
+    /**
+     * A formatted error message from the lexer.
+     */
+    inline const char *what() const noexcept override {
+      return m_message.c_str();
+    }
 
-  std::string m_message;
-};
+  private:
+    /**
+     * A pointer to the source code that was being tokenized when the error
+     * occurred. We need this so we can print the erroneous line.
+     */
+    const char *m_source;
 
-class Lexer {
-public:
-  explicit Lexer(std::string_view source);
+    // Location information
+    std::filesystem::path m_file;
+    std::size_t m_line;
+    std::size_t m_column;
 
-  void skip_whitespace();
-  Token next_token();
+    /**
+     * The error message to be printed when what() is called. We need to store
+     * this here because what() has to return a const char *, which must be
+     * valid for as long as the LexError object is.
+     */
+    std::string m_message;
+  };
 
-private:
-  std::string::const_iterator m_it;
-  std::string::const_iterator m_end;
-};
+  class Lexer {
+  public:
+    explicit Lexer(const std::filesystem::path &file);
 
-std::vector<Token> tokenize_source(std::string_view source);
-void print_lexer_error(const LexError &error);
+    std::optional<Token> next_token();
 
-} // namespace soda
+  private:
+    std::filesystem::path m_file;
+    std::size_t m_line = 1;
+    std::size_t m_column = 1;
+
+    std::string m_source;
+    std::size_t m_start = 0;
+    std::size_t m_position = 0;
+
+    Token make_identifier();
+    Token make_number();
+    Token make_token(TokenKind kind) const;
+    void skip_whitespace();
+  };
+
+  std::vector<Token> tokenize_source(std::string_view source);
+  void print_lexer_error(const LexError &error);
+}

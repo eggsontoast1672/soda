@@ -1,7 +1,6 @@
 #include "soda/lexer.hpp"
 
 #include <sstream>
-#include <stdexcept>
 
 static std::string escape(char c) {
   switch (c) {
@@ -28,98 +27,93 @@ static std::string escape(char c) {
   }
 }
 
+static bool is_ident_start(char c) { return std::isalpha(c) || c == '_'; }
+static bool is_ident(char c) { return is_ident_start(c) || std::isdigit(c); }
+
 namespace soda {
-
-LexError::LexError(const char *source, std::size_t line, std::size_t column)
-    : m_source{source}, m_line{line}, m_column{column} {
-  // FIXME this might be a little inefficient, we can make it better later
-  std::ostringstream stream;
-  stream << "line " << m_line << ", column " << m_column
-         << ": unrecognized character '@'";
-  m_message = stream.str();
-}
-
-Lexer::Lexer(std::string_view source)
-    : m_it{source.begin()}, m_end{source.end()} {}
-
-void Lexer::skip_whitespace() {
-  while (m_it != m_end && std::isspace(*m_it)) {
-    m_it++;
-  }
-}
-
-Token Lexer::next_token() {
-  if (m_it == m_end) {
-    return {TokenKind::EndOfFile, ""};
+  LexError::LexError(const char *source, std::size_t line, std::size_t column)
+      : m_source{source}, m_line{line}, m_column{column} {
+    // FIXME this might be a little inefficient, we can make it better later
+    std::ostringstream stream;
+    stream << "line " << m_line << ", column " << m_column
+           << ": unrecognized character '@'";
+    m_message = stream.str();
   }
 
-  skip_whitespace();
+  Lexer::Lexer(const std::filesystem::path &file) {
+    throw std::runtime_error{"todo"};
+  }
 
-  switch (*m_it) {
-  case '{':
-    m_it++;
-    return {TokenKind::BraceLeft, "{"};
-  case '}':
-    m_it++;
-    return {TokenKind::BraceRight, "}"};
-  case '(':
-    m_it++;
-    return {TokenKind::ParenLeft, "("};
-  case ')':
-    m_it++;
-    return {TokenKind::ParenRight, ")"};
-  case ';':
-    m_it++;
-    return {TokenKind::Semicolon, ";"};
-  default:
-    if (std::isdigit(*m_it)) {
-      std::string lexeme;
-      lexeme.push_back(*m_it);
-      m_it++;
-      while (m_it != m_end && std::isdigit(*m_it)) {
-        lexeme.push_back(*m_it);
-        m_it++;
+  std::optional<Token> Lexer::next_token() {
+    if (m_position >= m_source.size()) {
+      return std::nullopt;
+    }
+
+    skip_whitespace();
+
+    m_start = m_position;
+
+    char next = m_source[m_position];
+    m_position += 1;
+    switch (next) {
+      // clang-format off
+    case '{': return make_token(TokenKind::BraceLeft);
+    case '}': return make_token(TokenKind::BraceRight);
+    case '(': return make_token(TokenKind::ParenLeft);
+    case ')': return make_token(TokenKind::ParenRight);
+    case ';': return make_token(TokenKind::Semicolon);
+      // clang-format on
+
+    default:
+      if (std::isdigit(next)) {
+        return make_number();
+      } else if (is_ident_start(next)) {
+        return make_identifier();
+      } else {
+        throw LexError{"", 0, 0};
       }
-      return {TokenKind::Number, lexeme};
-    } else if (std::isalpha(*m_it) || *m_it == '_') {
-      std::string lexeme;
-      lexeme.push_back(*m_it);
-      m_it++;
-      while (m_it != m_end && (std::isalnum(*m_it) || *m_it == '_')) {
-        lexeme.push_back(*m_it);
-        m_it++;
-      }
-      TokenKind kind = identifier_kind(lexeme);
-      return {kind, lexeme};
-    } else {
-      Token token = {
-          .lexeme = std::string{*m_it},
-          .line = 1,
-          .column = 1,
-      };
-      throw LexError{"", 0, 0};
     }
   }
-}
 
-std::vector<Token> tokenize_source(std::string_view source) {
-  Lexer lexer{source};
-  std::vector<Token> tokens;
-  while (true) {
-    Token token = lexer.next_token();
-    if (token.kind != TokenKind::EndOfFile) {
-      tokens.push_back(token);
-    } else {
-      break;
+  Token Lexer::make_identifier() {
+    while (m_position < m_source.size() && is_ident(m_source[m_position])) {
+      m_position += 1;
+    }
+    std::string lexeme = m_source.substr(m_start, m_position - m_start);
+    TokenKind kind = identifier_kind(lexeme);
+    return Token{kind, lexeme};
+  }
+
+  Token Lexer::make_number() {
+    while (m_position < m_source.size() && std::isdigit(m_source[m_position])) {
+      m_position += 1;
+    }
+    return make_token(TokenKind::Number);
+  }
+
+  void Lexer::skip_whitespace() {
+    while (m_position < m_source.size() && std::isspace(m_source[m_position])) {
+      m_position += 1;
     }
   }
-  return tokens;
-}
 
-void print_lexer_error(const LexError &error) {
-  // Problem: we need access to the source code
-  // Solution 1: LexError stores a pointer to the source code, along with the
-  // line and column of the offending character.
-}
+  std::vector<Token> tokenize_source(std::string_view source) {
+    Lexer lexer{source};
+    std::vector<Token> tokens;
+    while (true) {
+      std::optional<Token> token = lexer.next_token();
+      if (token.has_value()) {
+        tokens.push_back(token.value());
+      } else {
+        break;
+      }
+    }
+    return tokens;
+  }
 
-} // namespace soda
+  void print_lexer_error(const LexError &error) {
+    // Problem: we need access to the source code
+    // Solution 1: LexError stores a pointer to the source code, along with the
+    // line and column of the offending character.
+  }
+}
