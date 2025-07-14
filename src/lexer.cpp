@@ -30,7 +30,8 @@ static std::string escape(char c) {
 static bool is_ident_start(char c) { return std::isalpha(c) || c == '_'; }
 static bool is_ident(char c) { return is_ident_start(c) || std::isdigit(c); }
 
-namespace soda {
+namespace soda::lexer {
+
   LexError::LexError(const char *source, std::size_t line, std::size_t column)
       : m_source{source}, m_line{line}, m_column{column} {
     // FIXME this might be a little inefficient, we can make it better later
@@ -91,6 +92,15 @@ namespace soda {
     return make_token(TokenKind::Number);
   }
 
+  Token Lexer::make_token(TokenKind kind) const {
+    return Token {
+      .kind = kind,
+      .lexeme = m_source.substr(m_start, m_position - m_start),
+      .line = m_line,
+      .column = m_column,
+    };
+  }
+
   void Lexer::skip_whitespace() {
     while (m_position < m_source.size() && std::isspace(m_source[m_position])) {
       m_position += 1;
@@ -116,4 +126,5 @@ namespace soda {
     // Solution 1: LexError stores a pointer to the source code, along with the
     // line and column of the offending character.
   }
+
 }

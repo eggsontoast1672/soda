@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SODA_PARSER_HPP
+#define SODA_PARSER_HPP
 
 #include <stdexcept>
 #include <vector>
@@ -6,7 +7,10 @@
 #include "soda/ast.hpp"
 #include "soda/token.hpp"
 
-namespace soda {
+namespace soda::parser {
+
+  using namespace token;
+
   class ParseError : public std::runtime_error {
   public:
     ParseError(const std::string &what_arg);
@@ -16,15 +20,21 @@ namespace soda {
   public:
     explicit Parser(const std::vector<Token> &tokens);
 
-    Token consume(TokenKind expected, const std::string &message);
-    Program program();
-    ReturnStatement return_statement();
+    void consume_token();
+
+    std::unique_ptr<ast::Expression> parse_identifier();
+    std::unique_ptr<ast::Expression> parse_integer_literal();
+
+    std::unique_ptr<ast::Statement> parse_block_statement();
+    std::unique_ptr<ast::Statement> parse_return_statement();
+
+    std::unique_ptr<ast::Declaration> parse_function_declaration();
 
   private:
     std::vector<Token> m_tokens;
-    std::size_t m_pos = 0;
+    const Token *m_current_token = nullptr;
   };
 
-  Program parse_source(std::string_view source);
-  Program parse_tokens(const std::vector<Token> &tokens);
 }
+
+#endif

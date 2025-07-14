@@ -2,7 +2,8 @@
 
 #include <string>
 
-namespace soda {
+namespace soda::token {
+
   enum class TokenKind {
     BraceLeft,
     BraceRight,
@@ -24,4 +25,5 @@ namespace soda {
     std::size_t line;
     std::size_t column;
   };
+
 }

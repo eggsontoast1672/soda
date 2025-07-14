@@ -1,3 +1,5 @@
-fn main() {
-  return 199;
+// vim: ft=rust
+
+fn main() -> i32 {
+    return 127;
 }

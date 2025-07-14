@@ -1,6 +1,7 @@
 #include "soda/token.hpp"
 
-namespace soda {
+namespace soda::token {
+
   TokenKind identifier_kind(std::string_view lexeme) {
     if (lexeme == "fn") {
       return TokenKind::Fn;
@@ -10,4 +11,5 @@ namespace soda {
       return TokenKind::Identifier;
     }
   }
+
 }

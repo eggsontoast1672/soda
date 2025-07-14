@@ -2,49 +2,42 @@
 
 #include "soda/lexer.hpp"
 
-namespace soda {
+namespace soda::parser {
+
+  using namespace ast;
+
   ParseError::ParseError(const std::string &what_arg)
       : std::runtime_error{what_arg} {}
 
-  Parser::Parser(const std::vector<Token> &tokens) : m_tokens{tokens} {}
+  Parser::Parser(const std::vector<Token> &tokens)
+    : m_tokens{tokens}, m_current_token{tokens.data()} {}
 
-  Token Parser::consume(TokenKind expected, const std::string &message) {
-    if (m_pos < m_tokens.size() && m_tokens[m_pos].kind == expected) {
-      Token token = m_tokens[m_pos];
-      m_pos += 1;
-      return token;
+  void Parser::consume_token() {
+    // For safety reasons, we do not want the current token pointer to advance
+    // past the EndOfFile token.
+    if (m_current_token->kind != TokenKind::EndOfFile) {
+      m_current_token++;
+    }
+  }
+
+  std::unique_ptr<Expression> Parser::parse_identifier() {
+    if (m_current_token->kind == TokenKind::Identifier) {
+      const std::string &name = m_current_token->lexeme;
+      consume_token();
+      return std::make_unique<Identifier>(name);
     } else {
-      throw ParseError{message};
+      return nullptr;
     }
   }
 
-  Program Parser::program() {
-    consume(TokenKind::Fn, "expected 'fn' keyword");
-    Token identifier = consume(TokenKind::Identifier, "expected identifier");
-    if (identifier.lexeme != "main") {
-      throw ParseError{"expected function to be called 'main'"};
+  std::unique_ptr<Expression> Parser::parse_integer_literal() {
+    if (m_current_token->kind == TokenKind::Number) {
+      int32_t value = std::stoi(m_current_token->lexeme);
+      consume_token();
+      return std::make_unique<IntegerLiteral>(value);
+    } else {
+      return nullptr;
     }
-    consume(TokenKind::ParenLeft, "expected '('");
-    consume(TokenKind::ParenRight, "expected ')'");
-    consume(TokenKind::BraceLeft, "expected '{'");
-    consume(TokenKind::Return, "expected 'return'");
-    Token number = consume(TokenKind::Number, "expected number");
-    int return_value = std::stoi(number.lexeme);
-    consume(TokenKind::Semicolon, "expected ';'");
-    consume(TokenKind::BraceRight, "expected '}'");
-    if (m_pos < m_tokens.size()) {
-      throw ParseError{"expected end of file"};
-    }
-    return return_value;
   }
 
-  Program parse_source(std::string_view source) {
-    std::vector<Token> tokens = tokenize_source(source);
-    return parse_tokens(tokens);
-  }
-
-  Program parse_tokens(const std::vector<Token> &tokens) {
-    Parser parser{tokens};
-    return parser.program();
-  }
 }

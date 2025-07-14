@@ -30,12 +30,5 @@ static void format_lexer_error() {
 }
 
 int main(int argc, const char *argv[]) {
-  format_lexer_error();
-  return 0;
-
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <file>\n";
-    return 1;
-  }
-  soda::compile_file(argv[1], "output.asm");
+  std::cout << "Work in progress, stay tuned!\n";
 }

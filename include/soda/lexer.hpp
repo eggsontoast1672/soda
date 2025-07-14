@@ -8,7 +8,10 @@
 
 #include "soda/token.hpp"
 
-namespace soda {
+namespace soda::lexer {
+
+  using namespace token;
+
   /**
    * An error which occurs during lexing, representing the presence of an
    * unrecognized character.

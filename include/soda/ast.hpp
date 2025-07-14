@@ -1,44 +1,72 @@
-#pragma once
+#ifndef SODA_AST_HPP
+#define SODA_AST_HPP
 
+#include <cstdint>
 #include <memory>
 
-namespace soda {
-  using Program = int;
-
-  class ASTVisitor;
+namespace soda::ast {
 
   class Node {
   public:
-    virtual void accept(ASTVisitor &visitor) = 0;
+    virtual ~Node() = default;
   };
 
   struct Expression : public Node {};
 
-  struct IntegerLiteral;
-
-  struct Statement : public Node {};
-
-  struct ReturnStatement;
-
-  class ASTVisitor {
+  class Identifier : public Expression {
   public:
-    virtual void visit_integer_literal(const IntegerLiteral &l) = 0;
-    virtual void visit_return_statement(const ReturnStatement &s) = 0;
+    Identifier(const std::string &name)
+      : m_name{name} {}
+
+  private:
+    std::string m_name;
   };
 
-  struct IntegerLiteral : public Expression {
-    int value;
+  class IntegerLiteral : public Expression {
+  public:
+    IntegerLiteral(std::int32_t value)
+      : m_value{value} {}
 
-    inline void accept(ASTVisitor &visitor) override {
-      visitor.visit_integer_literal(*this);
-    }
+  private:
+    std::int32_t m_value;
   };
 
-  struct ReturnStatement : public Statement {
-    std::unique_ptr<Expression> expression;
+  class Statement : public Node {};
 
-    inline void accept(ASTVisitor &visitor) override {
-      visitor.visit_return_statement(*this);
-    }
+  class ReturnStatement : public Statement {
+  public:
+    ReturnStatement(std::unique_ptr<Expression> return_value)
+      : m_return_value{std::move(return_value)} {}
+
+  private:
+    std::unique_ptr<Expression> m_return_value;
   };
+
+  class Declaration : public Node {};
+
+  struct FunctionParameter {
+    Identifier name;
+    Identifier type;
+  };
+
+  class FunctionDeclaration : public Declaration {
+  public:
+    FunctionDeclaration(Identifier name,
+                        Identifier return_type,
+                        std::vector<FunctionParameter> params,
+                        std::vector<std::unique_ptr<Statement>> body)
+      : m_name{name},
+        m_return_type{return_type},
+        m_params{params},
+        m_body{std::move(body)} {}
+
+  private:
+    Identifier m_name;
+    Identifier m_return_type;
+    std::vector<FunctionParameter> m_params;
+    std::vector<std::unique_ptr<Statement>> m_body;
+  };
+
 }
+
+#endif
