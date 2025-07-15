@@ -1,5 +1,25 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 project(Soda)
 
-add_executable(soda src/compiler.cpp src/lexer.cpp src/main.cpp src/parser.cpp src/token.cpp)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_GENERATOR Ninja)
+
+add_executable(soda
+  src/compiler.cpp
+  src/fs.cpp
+  src/lexer.cpp
+  src/main.cpp
+  src/options.cpp
+  src/parser.cpp
+  src/token.cpp)
+
+target_compile_options(soda
+  PRIVATE
+    -Wall -Wextra
+    -pedantic
+    -fcolor-diagnostics)
+
 target_include_directories(soda PRIVATE include)

@@ -15,8 +15,7 @@ namespace soda::ast {
 
   class Identifier : public Expression {
   public:
-    Identifier(const std::string &name)
-      : m_name{name} {}
+    Identifier(const std::string &name) : m_name{name} {}
 
   private:
     std::string m_name;
@@ -24,8 +23,7 @@ namespace soda::ast {
 
   class IntegerLiteral : public Expression {
   public:
-    IntegerLiteral(std::int32_t value)
-      : m_value{value} {}
+    IntegerLiteral(std::int32_t value) : m_value{value} {}
 
   private:
     std::int32_t m_value;
@@ -36,7 +34,7 @@ namespace soda::ast {
   class ReturnStatement : public Statement {
   public:
     ReturnStatement(std::unique_ptr<Expression> return_value)
-      : m_return_value{std::move(return_value)} {}
+        : m_return_value{std::move(return_value)} {}
 
   private:
     std::unique_ptr<Expression> m_return_value;
@@ -51,14 +49,11 @@ namespace soda::ast {
 
   class FunctionDeclaration : public Declaration {
   public:
-    FunctionDeclaration(Identifier name,
-                        Identifier return_type,
+    FunctionDeclaration(Identifier name, Identifier return_type,
                         std::vector<FunctionParameter> params,
                         std::vector<std::unique_ptr<Statement>> body)
-      : m_name{name},
-        m_return_type{return_type},
-        m_params{params},
-        m_body{std::move(body)} {}
+        : m_name{name}, m_return_type{return_type}, m_params{params},
+          m_body{std::move(body)} {}
 
   private:
     Identifier m_name;

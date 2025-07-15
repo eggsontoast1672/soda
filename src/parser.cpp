@@ -5,6 +5,7 @@
 namespace soda::parser {
 
   using namespace ast;
+  using namespace token;
 
   ParseError::ParseError(const std::string &what_arg)
       : std::runtime_error{what_arg} {}

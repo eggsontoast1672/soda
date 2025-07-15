@@ -9,8 +9,6 @@
 
 namespace soda::parser {
 
-  using namespace token;
-
   class ParseError : public std::runtime_error {
   public:
     ParseError(const std::string &what_arg);
@@ -18,7 +16,7 @@ namespace soda::parser {
 
   class Parser {
   public:
-    explicit Parser(const std::vector<Token> &tokens);
+    explicit Parser(const std::vector<token::Token> &tokens);
 
     void consume_token();
 
@@ -31,8 +29,8 @@ namespace soda::parser {
     std::unique_ptr<ast::Declaration> parse_function_declaration();
 
   private:
-    std::vector<Token> m_tokens;
-    const Token *m_current_token = nullptr;
+    std::vector<token::Token> m_tokens;
+    const token::Token *m_current_token = nullptr;
   };
 
 }

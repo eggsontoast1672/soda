@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace soda::token {
 
@@ -10,6 +11,7 @@ namespace soda::token {
     ParenLeft,
     ParenRight,
     Semicolon,
+    Arrow,
     Identifier,
     Number,
     Fn,
@@ -17,6 +19,7 @@ namespace soda::token {
     EndOfFile,
   };
 
+  std::ostream &operator<<(std::ostream &stream, TokenKind kind);
   TokenKind identifier_kind(std::string_view lexeme);
 
   struct Token {
@@ -25,5 +28,7 @@ namespace soda::token {
     std::size_t line;
     std::size_t column;
   };
+
+  void dump_json(const std::vector<Token> &tokens, std::ostream &stream);
 
 }

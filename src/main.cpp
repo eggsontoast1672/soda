@@ -1,7 +1,11 @@
 #include <filesystem>
 #include <iostream>
 
-#include "soda/compiler.hpp"
+#include "soda/fs.hpp"
+#include "soda/lexer.hpp"
+#include "soda/options.hpp"
+
+#if 0
 
 static void format_lexer_error() {
   // We need a pointer to the source code, or at least to the line on which the
@@ -29,6 +33,24 @@ static void format_lexer_error() {
   std::cerr << '\n';
 }
 
-int main(int argc, const char *argv[]) {
-  std::cout << "Work in progress, stay tuned!\n";
+// Usage: soda [--tokens] [-o <file>] <file.soda>
+
+static void print_files(const std::vector<std::string> &files) {
+  std::cout << "{\n";
+  for (const std::string &file : files) {
+    std::cout << "  \"" << file << "\",\n";
+  }
+  std::cout << "}\n";
+}
+
+#endif
+
+int main(int argc, char **argv) {
+  using soda::options::Options;
+
+  Options opts = soda::options::get(argc, argv);
+  std::string contents = soda::fs::read_to_string(opts.files.at(0));
+  soda::lexer::Lexer lexer{contents};
+  std::vector<soda::token::Token> tokens = lexer.get_all_tokens();
+  soda::token::dump_json(tokens, std::cout);
 }
