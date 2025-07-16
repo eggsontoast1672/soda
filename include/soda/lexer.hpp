@@ -5,7 +5,7 @@
 
 #include "soda/token.hpp"
 
-namespace soda::lexer {
+namespace soda {
 
   class Lexer {
   public:
@@ -14,8 +14,8 @@ namespace soda::lexer {
     char char_at(std::size_t index);
     char consume_char();
 
-    token::Token get_next_token();
-    std::vector<token::Token> get_all_tokens();
+    Token get_next_token();
+    std::vector<Token> get_all_tokens();
 
   private:
     std::string m_source;
@@ -24,9 +24,9 @@ namespace soda::lexer {
     std::size_t m_line = 1;
     std::size_t m_column = 1;
 
-    token::Token make_identifier();
-    token::Token make_number();
-    token::Token make_token(token::TokenKind kind) const;
+    Token make_identifier();
+    Token make_number();
+    Token make_token(TokenKind kind) const;
 
     void skip_whitespace();
   };

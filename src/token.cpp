@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace soda::token {
+namespace soda {
 
   std::ostream &operator<<(std::ostream &stream, TokenKind kind) {
     stream << "TokenKind::";
@@ -56,7 +56,8 @@ namespace soda::token {
     }
   }
 
-  void dump_json(const std::vector<Token> &tokens, std::ostream &stream) {
+  void dump_tokens_to_json(const std::vector<Token> &tokens,
+                           std::ostream &stream) {
     stream << "[\n";
     for (std::size_t i = 0; i < tokens.size(); i++) {
       stream << "  { \"kind\": \"" << tokens[i].kind << "\",";

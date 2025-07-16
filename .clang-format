@@ -1,2 +1,1 @@
-FixNamespaceComments: false
-NamespaceIndentation: All
+ColumnLimit: 100

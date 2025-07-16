@@ -5,16 +5,15 @@
 #include <optional>
 #include <vector>
 
-namespace soda::options {
+namespace soda {
 
   struct Options {
     bool dump_tokens = false;
     std::optional<std::filesystem::path> output_path;
     std::vector<std::string> files;
   };
-  
-  void print_usage_and_exit(const char *program);
-  Options get(int argc, char **argv);
+
+  Options parse_options(int argc, char **argv);
 
 }
 

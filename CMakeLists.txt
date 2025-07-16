@@ -8,9 +8,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_GENERATOR Ninja)
 
 add_executable(soda
-  src/compiler.cpp
   src/fs.cpp
   src/lexer.cpp
+  src/logging.cpp
   src/main.cpp
   src/options.cpp
   src/parser.cpp
@@ -19,7 +19,6 @@ add_executable(soda
 target_compile_options(soda
   PRIVATE
     -Wall -Wextra
-    -pedantic
-    -fcolor-diagnostics)
+    -pedantic)
 
 target_include_directories(soda PRIVATE include)

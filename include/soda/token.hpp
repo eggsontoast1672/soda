@@ -1,9 +1,10 @@
-#pragma once
+#ifndef SODA_TOKEN_HPP
+#define SODA_TOKEN_HPP
 
 #include <string>
 #include <vector>
 
-namespace soda::token {
+namespace soda {
 
   enum class TokenKind {
     BraceLeft,
@@ -29,6 +30,9 @@ namespace soda::token {
     std::size_t column;
   };
 
-  void dump_json(const std::vector<Token> &tokens, std::ostream &stream);
+  void dump_tokens_to_json(const std::vector<Token> &tokens,
+                           std::ostream &stream);
 
 }
+
+#endif

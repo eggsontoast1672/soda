@@ -5,9 +5,7 @@
 static bool is_ident_start(char c) { return std::isalpha(c) || c == '_'; }
 static bool is_ident(char c) { return is_ident_start(c) || std::isdigit(c); }
 
-namespace soda::lexer {
-
-  using namespace token;
+namespace soda {
 
   Lexer::Lexer(const std::string &source) : m_source{source} {}
 

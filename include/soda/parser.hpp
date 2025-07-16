@@ -1,38 +1,35 @@
 #ifndef SODA_PARSER_HPP
 #define SODA_PARSER_HPP
 
-#include <stdexcept>
 #include <vector>
 
 #include "soda/ast.hpp"
 #include "soda/token.hpp"
 
-namespace soda::parser {
+namespace soda {
 
-  class ParseError : public std::runtime_error {
-  public:
-    ParseError(const std::string &what_arg);
-  };
+class Parser {
+public:
+  explicit Parser(const std::vector<Token> &tokens);
 
-  class Parser {
-  public:
-    explicit Parser(const std::vector<token::Token> &tokens);
+  Token advance();
+  Token expect_token(TokenKind kind);
 
-    void consume_token();
+  std::unique_ptr<Expression> parse_expression();
+  std::unique_ptr<Expression> parse_identifier();
+  std::unique_ptr<Expression> parse_integer_literal();
 
-    std::unique_ptr<ast::Expression> parse_identifier();
-    std::unique_ptr<ast::Expression> parse_integer_literal();
+  std::unique_ptr<Statement> parse_statement();
+  std::unique_ptr<Statement> parse_block_statement();
+  std::unique_ptr<Statement> parse_return_statement();
 
-    std::unique_ptr<ast::Statement> parse_block_statement();
-    std::unique_ptr<ast::Statement> parse_return_statement();
+  std::unique_ptr<Declaration> parse_function_declaration();
 
-    std::unique_ptr<ast::Declaration> parse_function_declaration();
+private:
+  std::vector<Token> m_tokens;
+  const Token *m_current_token = nullptr;
+};
 
-  private:
-    std::vector<token::Token> m_tokens;
-    const token::Token *m_current_token = nullptr;
-  };
-
-}
+} // namespace soda
 
 #endif

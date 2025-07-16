@@ -3,15 +3,17 @@
 #include <cstring>
 #include <iostream>
 
-namespace soda::options {
+static void print_usage_and_exit(const char *program) {
+  std::cerr << "Usage: " << program << " [OPTIONS] INPUT\n\n";
+  std::cerr << "Options:\n";
+  std::cerr << "    -o <FILENAME>       Write output to FILENAME\n";
+  std::cerr << "    --tokens            Dump the tokens of a file\n";
+  std::exit(1);
+}
 
-  void print_usage_and_exit(const char *program) {
-    std::cerr << "Usage: " << program
-      << " [--tokens] [-o <file>] <file>\n";
-    std::exit(1);
-  }
+namespace soda {
 
-  Options get(int argc, char **argv) {
+  Options parse_options(int argc, char **argv) {
     Options options;
 
     for (int i = 1; i < argc; i++) {

@@ -6,6 +6,26 @@
 #include "soda/lexer.hpp"
 #include "soda/options.hpp"
 
+int main(int argc, char **argv) {
+  soda::Options opts = soda::parse_options(argc, argv);
+  if (!opts.dump_tokens) {
+    std::cerr << "This part of the compiler is not yet implemented.\n";
+    std::cerr << "Please add the '--tokens' option.\n";
+    std::exit(1);
+  }
+
+  std::string contents = soda::read_path_to_string(opts.files.at(0));
+  soda::Lexer lexer{contents};
+  std::vector<soda::Token> tokens = lexer.get_all_tokens();
+
+  if (opts.output_path) {
+    std::ofstream stream{*opts.output_path};
+    soda::dump_tokens_to_json(tokens, stream);
+  } else {
+    soda::dump_tokens_to_json(tokens, std::cout);
+  }
+}
+
 #if 0
 
 static void format_lexer_error() {
@@ -34,36 +54,4 @@ static void format_lexer_error() {
   std::cerr << '\n';
 }
 
-// Usage: soda [--tokens] [-o <file>] <file.soda>
-
-static void print_files(const std::vector<std::string> &files) {
-  std::cout << "{\n";
-  for (const std::string &file : files) {
-    std::cout << "  \"" << file << "\",\n";
-  }
-  std::cout << "}\n";
-}
-
 #endif
-
-int main(int argc, char **argv) {
-  using soda::options::Options;
-
-  Options opts = soda::options::get(argc, argv);
-  if (!opts.dump_tokens) {
-    std::cerr << "This part of the compiler is not yet implemented.\n";
-    std::cerr << "Please add the '--tokens' option.\n";
-    std::exit(1);
-  }
-
-  std::string contents = soda::fs::read_to_string(opts.files.at(0));
-  soda::lexer::Lexer lexer{contents};
-  std::vector<soda::token::Token> tokens = lexer.get_all_tokens();
-
-  if (opts.output_path) {
-    std::ofstream stream{*opts.output_path};
-    soda::token::dump_json(tokens, stream);
-  } else {
-    soda::token::dump_json(tokens, std::cout);
-  }
-}

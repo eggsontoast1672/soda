@@ -1,44 +1,103 @@
 #include "soda/parser.hpp"
 
-#include "soda/lexer.hpp"
+#include <sstream>
 
-namespace soda::parser {
+#include "soda/logging.hpp"
 
-  using namespace ast;
-  using namespace token;
+namespace soda {
 
-  ParseError::ParseError(const std::string &what_arg)
-      : std::runtime_error{what_arg} {}
-
-  Parser::Parser(const std::vector<Token> &tokens)
-    : m_tokens{tokens}, m_current_token{tokens.data()} {}
-
-  void Parser::consume_token() {
-    // For safety reasons, we do not want the current token pointer to advance
-    // past the EndOfFile token.
-    if (m_current_token->kind != TokenKind::EndOfFile) {
-      m_current_token++;
-    }
+Parser::Parser(const std::vector<Token> &tokens)
+    : m_tokens{tokens}, m_current_token{tokens.data()} {
+  if (tokens.back().kind != TokenKind::EndOfFile) {
+    soda::log_fatal("token stream must be terminated by TokenKind::EndOfFile\n");
   }
-
-  std::unique_ptr<Expression> Parser::parse_identifier() {
-    if (m_current_token->kind == TokenKind::Identifier) {
-      const std::string &name = m_current_token->lexeme;
-      consume_token();
-      return std::make_unique<Identifier>(name);
-    } else {
-      return nullptr;
-    }
-  }
-
-  std::unique_ptr<Expression> Parser::parse_integer_literal() {
-    if (m_current_token->kind == TokenKind::Number) {
-      int32_t value = std::stoi(m_current_token->lexeme);
-      consume_token();
-      return std::make_unique<IntegerLiteral>(value);
-    } else {
-      return nullptr;
-    }
-  }
-
 }
+
+Token Parser::advance() {
+  // Safety: The constructor ensures that the token stream is terminated with an end of file token,
+  // so token consumption should never be unsafe.
+  const Token &token = *m_current_token;
+  if (m_current_token->kind != TokenKind::EndOfFile) {
+    m_current_token++;
+  }
+  return token;
+}
+
+Token Parser::expect_token(TokenKind kind) {
+  if (m_current_token->kind != kind) {
+    std::ostringstream stream;
+    stream << m_current_token->kind;
+    soda::log_fatal("expected '%s'\n", stream.str().c_str());
+  } else {
+    return advance();
+  }
+}
+
+std::unique_ptr<Expression> Parser::parse_expression() {
+  switch (m_current_token->kind) {
+  case TokenKind::Identifier:
+    return parse_identifier();
+  case TokenKind::Number:
+    return parse_integer_literal();
+  default:
+    soda::log_fatal("expected expression");
+  }
+}
+
+std::unique_ptr<Expression> Parser::parse_identifier() {
+  Token token = advance();
+  if (token.kind == TokenKind::Identifier) {
+    return std::make_unique<Identifier>(token.lexeme);
+  } else {
+    soda::log_fatal("expected identifier");
+  }
+}
+
+std::unique_ptr<Expression> Parser::parse_integer_literal() {
+  Token token = advance();
+  if (token.kind == TokenKind::Number) {
+    std::int32_t value = std::stoi(token.lexeme);
+    return std::make_unique<IntegerLiteral>(value);
+  } else {
+    soda::log_fatal("expected integer literal");
+  }
+}
+
+std::unique_ptr<Statement> Parser::parse_statement() {
+  switch (m_current_token->kind) {
+  case TokenKind::BraceLeft:
+    return parse_block_statement();
+  case TokenKind::Return:
+    return parse_return_statement();
+  default:
+    soda::log_fatal("expected statement");
+  }
+}
+
+std::unique_ptr<Statement> Parser::parse_block_statement() {
+  expect_token(TokenKind::BraceLeft);
+  std::vector<std::unique_ptr<Statement>> statements;
+  while (m_current_token->kind != TokenKind::BraceRight) {
+    std::unique_ptr<Statement> stmt = parse_statement();
+    statements.push_back(std::move(stmt));
+  }
+  return std::make_unique<BlockStatement>(std::move(statements));
+}
+
+std::unique_ptr<Statement> Parser::parse_return_statement() {
+  expect_token(TokenKind::Return);
+  std::unique_ptr<Expression> return_value = parse_expression();
+  expect_token(TokenKind::Semicolon);
+  return std::make_unique<ReturnStatement>(std::move(return_value));
+}
+
+std::unique_ptr<Declaration> Parser::parse_function_declaration() {
+  expect_token(TokenKind::Fn);
+  std::string name = expect_token(TokenKind::Identifier).lexeme;
+  expect_token(TokenKind::ParenLeft);
+  expect_token(TokenKind::ParenRight); // For now, don't parse args
+  std::unique_ptr<Statement> body = parse_block_statement();
+  return std::make_unique<FunctionDeclaration>(name, std::nullopt, std::vector<Parameter>{}, body);
+}
+
+} // namespace soda
