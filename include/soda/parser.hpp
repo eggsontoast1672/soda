@@ -16,14 +16,14 @@ public:
   Token expect_token(TokenKind kind);
 
   Expression parse_expression();
-  Expression parse_identifier();
-  Expression parse_integer_literal();
+  Identifier parse_identifier();
+  IntegerLiteral parse_integer_literal();
 
   Statement parse_statement();
   BlockStatement parse_block_statement();
-  Statement parse_return_statement();
+  ReturnStatement parse_return_statement();
 
-  Declaration parse_function_declaration();
+  FunctionDeclaration parse_function_declaration();
 
 private:
   std::vector<Token> m_tokens;

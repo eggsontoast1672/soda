@@ -44,26 +44,20 @@ Expression Parser::parse_expression() {
   }
 }
 
-Expression Parser::parse_identifier() {
+Identifier Parser::parse_identifier() {
   Token token = advance();
   if (token.kind == TokenKind::Identifier) {
-    return Expression{
-        std::in_place_type<Identifier>,
-        token.lexeme,
-    };
+    return Identifier{token.lexeme};
   } else {
     soda::log_fatal("expected identifier");
   }
 }
 
-Expression Parser::parse_integer_literal() {
+IntegerLiteral Parser::parse_integer_literal() {
   Token token = advance();
   if (token.kind == TokenKind::Number) {
     std::int32_t value = std::stoi(token.lexeme);
-    return Expression{
-        std::in_place_type<IntegerLiteral>,
-        value,
-    };
+    return IntegerLiteral{value};
   } else {
     soda::log_fatal("expected integer literal");
   }
@@ -90,25 +84,24 @@ BlockStatement Parser::parse_block_statement() {
   return BlockStatement{statements};
 }
 
-Statement Parser::parse_return_statement() {
+ReturnStatement Parser::parse_return_statement() {
   expect_token(TokenKind::Return);
   Expression return_value = parse_expression();
   expect_token(TokenKind::Semicolon);
-  return Statement{
-      std::in_place_type<ReturnStatement>,
-      return_value,
-  };
+  return ReturnStatement{return_value};
 }
 
-Declaration Parser::parse_function_declaration() {
+FunctionDeclaration Parser::parse_function_declaration() {
   expect_token(TokenKind::Fn);
   std::string name = expect_token(TokenKind::Identifier).lexeme;
   expect_token(TokenKind::ParenLeft);
   expect_token(TokenKind::ParenRight); // For now, don't parse args
   BlockStatement body = parse_block_statement();
-  return Declaration{
-      std::in_place_type<FunctionDeclaration>, name, std::nullopt,
-      std::vector<TypedIdentifier>{},          body,
+  return FunctionDeclaration{
+      name,
+      std::nullopt,
+      std::vector<TypedIdentifier>{},
+      body,
   };
 }
 
