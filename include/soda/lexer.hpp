@@ -7,29 +7,7 @@
 
 namespace soda {
 
-  class Lexer {
-  public:
-    explicit Lexer(const std::string &source);
-
-    char char_at(std::size_t index);
-    char consume_char();
-
-    Token get_next_token();
-    std::vector<Token> get_all_tokens();
-
-  private:
-    std::string m_source;
-    std::size_t m_start = 0;
-    std::size_t m_pos = 0;
-    std::size_t m_line = 1;
-    std::size_t m_column = 1;
-
-    Token make_identifier();
-    Token make_number();
-    Token make_token(TokenKind kind) const;
-
-    void skip_whitespace();
-  };
+std::vector<Token> tokenize(const std::string &source);
 
 }
 

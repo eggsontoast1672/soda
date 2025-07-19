@@ -15,8 +15,7 @@ int main(int argc, char **argv) {
   }
 
   std::string contents = soda::read_path_to_string(opts.files.at(0));
-  soda::Lexer lexer{contents};
-  std::vector<soda::Token> tokens = lexer.get_all_tokens();
+  std::vector<soda::Token> tokens = soda::tokenize(contents);
 
   if (opts.output_path) {
     std::ofstream stream{*opts.output_path};
