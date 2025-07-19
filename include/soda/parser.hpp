@@ -15,15 +15,15 @@ public:
   Token advance();
   Token expect_token(TokenKind kind);
 
-  std::unique_ptr<Expression> parse_expression();
-  std::unique_ptr<Expression> parse_identifier();
-  std::unique_ptr<Expression> parse_integer_literal();
+  Expression parse_expression();
+  Expression parse_identifier();
+  Expression parse_integer_literal();
 
-  std::unique_ptr<Statement> parse_statement();
-  std::unique_ptr<Statement> parse_block_statement();
-  std::unique_ptr<Statement> parse_return_statement();
+  Statement parse_statement();
+  BlockStatement parse_block_statement();
+  Statement parse_return_statement();
 
-  std::unique_ptr<Declaration> parse_function_declaration();
+  Declaration parse_function_declaration();
 
 private:
   std::vector<Token> m_tokens;

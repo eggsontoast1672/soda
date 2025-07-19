@@ -33,7 +33,7 @@ Token Parser::expect_token(TokenKind kind) {
   }
 }
 
-std::unique_ptr<Expression> Parser::parse_expression() {
+Expression Parser::parse_expression() {
   switch (m_current_token->kind) {
   case TokenKind::Identifier:
     return parse_identifier();
@@ -44,26 +44,32 @@ std::unique_ptr<Expression> Parser::parse_expression() {
   }
 }
 
-std::unique_ptr<Expression> Parser::parse_identifier() {
+Expression Parser::parse_identifier() {
   Token token = advance();
   if (token.kind == TokenKind::Identifier) {
-    return std::make_unique<Identifier>(token.lexeme);
+    return Expression{
+        std::in_place_type<Identifier>,
+        token.lexeme,
+    };
   } else {
     soda::log_fatal("expected identifier");
   }
 }
 
-std::unique_ptr<Expression> Parser::parse_integer_literal() {
+Expression Parser::parse_integer_literal() {
   Token token = advance();
   if (token.kind == TokenKind::Number) {
     std::int32_t value = std::stoi(token.lexeme);
-    return std::make_unique<IntegerLiteral>(value);
+    return Expression{
+        std::in_place_type<IntegerLiteral>,
+        value,
+    };
   } else {
     soda::log_fatal("expected integer literal");
   }
 }
 
-std::unique_ptr<Statement> Parser::parse_statement() {
+Statement Parser::parse_statement() {
   switch (m_current_token->kind) {
   case TokenKind::BraceLeft:
     return parse_block_statement();
@@ -74,30 +80,36 @@ std::unique_ptr<Statement> Parser::parse_statement() {
   }
 }
 
-std::unique_ptr<Statement> Parser::parse_block_statement() {
+BlockStatement Parser::parse_block_statement() {
   expect_token(TokenKind::BraceLeft);
-  std::vector<std::unique_ptr<Statement>> statements;
+  std::vector<Statement> statements;
   while (m_current_token->kind != TokenKind::BraceRight) {
-    std::unique_ptr<Statement> stmt = parse_statement();
-    statements.push_back(std::move(stmt));
+    Statement stmt = parse_statement();
+    statements.push_back(stmt);
   }
-  return std::make_unique<BlockStatement>(std::move(statements));
+  return BlockStatement{statements};
 }
 
-std::unique_ptr<Statement> Parser::parse_return_statement() {
+Statement Parser::parse_return_statement() {
   expect_token(TokenKind::Return);
-  std::unique_ptr<Expression> return_value = parse_expression();
+  Expression return_value = parse_expression();
   expect_token(TokenKind::Semicolon);
-  return std::make_unique<ReturnStatement>(std::move(return_value));
+  return Statement{
+      std::in_place_type<ReturnStatement>,
+      return_value,
+  };
 }
 
-std::unique_ptr<Declaration> Parser::parse_function_declaration() {
+Declaration Parser::parse_function_declaration() {
   expect_token(TokenKind::Fn);
   std::string name = expect_token(TokenKind::Identifier).lexeme;
   expect_token(TokenKind::ParenLeft);
   expect_token(TokenKind::ParenRight); // For now, don't parse args
-  std::unique_ptr<Statement> body = parse_block_statement();
-  return std::make_unique<FunctionDeclaration>(name, std::nullopt, std::vector<Parameter>{}, body);
+  BlockStatement body = parse_block_statement();
+  return Declaration{
+      std::in_place_type<FunctionDeclaration>, name, std::nullopt,
+      std::vector<TypedIdentifier>{},          body,
+  };
 }
 
 } // namespace soda
