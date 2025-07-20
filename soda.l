@@ -10,11 +10,6 @@ static std::vector<Token> s_tokens;
 
 #define MAKE_TOKEN(kind) Token{kind, yytext, 0, 0}
 
-extern "C" int yywrap() {
-  s_tokens.push_back(MAKE_TOKEN(TokenKind::EndOfFile));
-  return 1;
-}
-
 %}
 
 IDENTIFIER  [a-zA-Z_][a-zA-Z0-9_]*
@@ -44,6 +39,11 @@ return  s_tokens.push_back(MAKE_TOKEN(TokenKind::Return));
   }
 
 %%
+
+extern "C" int yywrap() {
+  s_tokens.push_back(MAKE_TOKEN(TokenKind::EndOfFile));
+  return 1;
+}
 
 namespace soda {
 

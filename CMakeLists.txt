@@ -13,20 +13,20 @@ add_custom_command(
   DEPENDS soda.l
 )
 
-add_executable(soda
+add_executable(
+  soda
   src/fs.cpp
-  src/lexer.cpp
+  src/lex.yy.cpp
   src/logging.cpp
   src/main.cpp
   src/options.cpp
   src/parser.cpp
-  src/token.cpp)
-
-set_source_files_properties(src/lexer.cpp PROPERTIES COMPILE_FLAGS -Wno-unused-function)
-
-target_compile_options(
-  soda
-  PRIVATE -Wall -Wextra -pedantic
+  src/token.cpp
 )
 
+# We cannot control what flex generates, so ensure that if it generates a
+# function that is not used, that it is not reported as a warning.
+set_source_files_properties(src/lex.yy.cpp PROPERTIES COMPILE_FLAGS -Wno-unused-function)
+
+target_compile_options(soda PRIVATE -Wall -Wextra -pedantic)
 target_include_directories(soda PRIVATE include)
