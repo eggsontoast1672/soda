@@ -13,6 +13,28 @@ namespace soda {
 // Expressions //
 /////////////////
 
+/*
+ * LiteralExpression ->
+ *    | STRING_LITERAL
+ *    | INTEGER_LITERAL
+ *    | FLOAT_LITERAL
+ *    | true
+ *    | false
+ *
+ * OperatorExpression ->
+ *    | NegationExpression
+ *    | ArithmeticOrLogicalExpression
+ *    | ComparisonExpression
+ *    | LazyBooleanExpression
+ *    | AssignmentExpression
+ *
+ * GroupedExpression -> '(' Expression ')'
+ *
+ * CallExpression -> Expression '(' CallParams? ')'
+ *
+ * CallParams -> Expression ( ',' Expression )* ','?
+ */
+
 struct Identifier {
   std::string name;
 };
