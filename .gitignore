@@ -1,3 +1,8 @@
 /.cache
 /build
 /src/lex.yy.cpp
+
+
+# Added by cargo
+
+/target
